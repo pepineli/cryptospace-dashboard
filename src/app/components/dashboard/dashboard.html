@@ -17,8 +17,8 @@
   <div class="sort-bar">
     <span class="sort-label">Ordenar por:</span>
     <div class="sort-buttons">
-      <button (click)="sortBy('price')" [class.active]="sortType === 'price'" class="sort-btn">Preço</button>
-      <button (click)="sortBy('change')" [class.active]="sortType === 'change'" class="sort-btn">Variação</button>
+      <button (click)="sortBy('price')" [class.active]="sortType === 'price'" class="sort-btn">Preco</button>
+      <button (click)="sortBy('change')" [class.active]="sortType === 'change'" class="sort-btn">Variacao</button>
       <button (click)="sortBy('marketCap')" [class.active]="sortType === 'marketCap'" class="sort-btn">Market Cap</button>
       <button (click)="sortBy('rank')" [class.active]="sortType === 'rank'" class="sort-btn">Rank</button>
     </div>
@@ -97,7 +97,7 @@
         </div>
         <div class="loading-chart" *ngIf="chartLoading">
           <div class="small-spinner"></div>
-          <p>Carregando gráfico...</p>
+          <p>Carregando grafico...</p>
         </div>
         <div class="stats">
           <div class="stat">
@@ -112,4 +112,8 @@
       </div>
     </div>
   </div>
+
+  <footer class="footer">
+    <p>Data provided by <a href="https://www.coingecko.com/en/api" target="_blank" rel="noopener noreferrer">CoinGecko</a></p>
+  </footer>
 </div>
