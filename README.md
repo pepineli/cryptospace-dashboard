@@ -179,6 +179,8 @@ ng build --configuration production --base-href "https://pepineli.github.io/cryp
 
 This project is open source and available under the MIT License.
 
+Data provided by [CoinGecko](https://www.coingecko.com/en/api)
+
 ## Acknowledgments
 
 - CoinGecko for providing the cryptocurrency API
