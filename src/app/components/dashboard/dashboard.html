@@ -1,0 +1,120 @@
+<div class="dashboard">
+  <header class="header">
+    <h1>CryptoSpace Dashboard</h1>
+    <p>Acompanhe o mercado cripto em tempo real</p>
+  </header>
+
+  <div class="search-bar">
+    <input 
+      type="text" 
+      placeholder="Buscar criptomoeda..." 
+      [(ngModel)]="searchTerm"
+      (input)="filterCryptos()"
+      class="search-input"
+    />
+  </div>
+
+  <div class="sort-bar">
+    <span class="sort-label">Ordenar por:</span>
+    <div class="sort-buttons">
+      <button (click)="sortBy('price')" [class.active]="sortType === 'price'" class="sort-btn">Preco</button>
+      <button (click)="sortBy('change')" [class.active]="sortType === 'change'" class="sort-btn">Variacao</button>
+      <button (click)="sortBy('marketCap')" [class.active]="sortType === 'marketCap'" class="sort-btn">Market Cap</button>
+      <button (click)="sortBy('rank')" [class.active]="sortType === 'rank'" class="sort-btn">Rank</button>
+    </div>
+    <button (click)="toggleOrder()" class="order-btn">
+      {{ sortAscending ? 'Crescente ↑' : 'Decrescente ↓' }}
+    </button>
+    <button (click)="refreshData()" class="refresh-btn">
+      Atualizar
+    </button>
+  </div>
+
+  <div class="per-page-bar">
+    <span class="per-page-label">Mostrar:</span>
+    <div class="per-page-buttons">
+      <button (click)="changePerPage(20)" [class.active]="perPage === 20" class="per-page-btn">20</button>
+      <button (click)="changePerPage(50)" [class.active]="perPage === 50" class="per-page-btn">50</button>
+      <button (click)="changePerPage(100)" [class.active]="perPage === 100" class="per-page-btn">100</button>
+    </div>
+  </div>
+
+  <div class="featured-chart" *ngIf="!loading && bitcoinData">
+    <h2 class="featured-title">Bitcoin BTC</h2>
+    <div class="featured-price">
+      <span class="featured-big-price">{{ formatPrice(bitcoinData.current_price) }}</span>
+      <span class="percentage" [class]="getPercentageClass(bitcoinData.price_change_percentage_24h)">
+        {{ formatPercentage(bitcoinData.price_change_percentage_24h) }}
+      </span>
+    </div>
+    <div class="featured-chart-container">
+      <canvas #mainChart></canvas>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Carregando dados do universo cripto...</p>
+  </div>
+
+  <div class="crypto-grid" *ngIf="!loading && filteredCryptos.length > 0">
+    <div class="crypto-card" *ngFor="let crypto of filteredCryptos" (click)="selectCrypto(crypto)">
+      <div class="crypto-header">
+        <img [src]="crypto.image" [alt]="crypto.name" class="crypto-icon">
+        <div class="crypto-info">
+          <h3>{{ crypto.name }}</h3>
+          <span class="symbol">{{ crypto.symbol.toUpperCase() }}</span>
+        </div>
+      </div>
+      <div class="crypto-price">
+        <span class="price">{{ formatPrice(crypto.current_price) }}</span>
+        <span class="percentage" [class]="getPercentageClass(crypto.price_change_percentage_24h)">
+          {{ formatPercentage(crypto.price_change_percentage_24h) }}
+        </span>
+      </div>
+      <div class="crypto-market-cap">
+        <span>Rank #{{ crypto.market_cap_rank }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && filteredCryptos.length === 0">
+    <p>Nenhuma criptomoeda encontrada. Tente outra busca.</p>
+  </div>
+
+  <div class="modal" *ngIf="selectedCrypto" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ selectedCrypto.name }} <span class="modal-symbol">({{ selectedCrypto.symbol.toUpperCase() }})</span></h2>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="price-info">
+          <span class="big-price">{{ formatPrice(selectedCrypto.current_price) }}</span>
+          <span class="percentage" [class]="getPercentageClass(selectedCrypto.price_change_percentage_24h)">
+            {{ formatPercentage(selectedCrypto.price_change_percentage_24h) }}
+          </span>
+        </div>
+
+        <div class="chart-container" *ngIf="!chartLoading">
+          <canvas #priceChart></canvas>
+        </div>
+        <div class="loading-chart" *ngIf="chartLoading">
+          <div class="small-spinner"></div>
+          <p>Carregando grafico...</p>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <label>Market Cap</label>
+            <span>{{ formatPrice(selectedCrypto.market_cap) }}</span>
+          </div>
+          <div class="stat">
+            <label>Rank</label>
+            <span>#{{ selectedCrypto.market_cap_rank }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
