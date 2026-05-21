@@ -30,7 +30,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   sortType: string = 'rank';
   sortAscending: boolean = true;
   perPage: number = 20;
-  currency: string = 'brl';
 
   constructor(
     private apiService: ApiService,
@@ -47,11 +46,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.loading = true;
     this.cdr.detectChanges();
     
-    this.apiService.getCryptos(this.currency, this.perPage).subscribe({
+    this.apiService.getCryptos('brl', this.perPage).subscribe({
       next: (data: any) => {
-        this.cryptos = data;
-        this.filteredCryptos = data;
-        this.applySortAndFilter();
+        if (data && Array.isArray(data)) {
+          this.cryptos = data;
+          this.filteredCryptos = [...data];
+          this.applySortAndFilter();
+        } else {
+          console.error('Dados invalidos:', data);
+        }
         this.loading = false;
         this.cdr.detectChanges();
         this.loadBitcoinData();
@@ -68,29 +71,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.apiService.getCryptoHistory('bitcoin', 7).subscribe({
       next: (data: any) => {
         this.bitcoinHistoryData = data;
-        this.bitcoinData = this.cryptos.find(c => c.id === 'bitcoin');
+        this.bitcoinData = this.cryptos && this.cryptos.find(c => c.id === 'bitcoin');
         this.cdr.detectChanges();
         setTimeout(() => this.createMainChart(), 200);
       },
       error: (err: any) => {
         console.error('Erro ao carregar Bitcoin:', err);
-      }
-    });
-  }
-
-  refreshData(): void {
-    console.log('Atualizando dados...');
-    this.apiService.getCryptos(this.currency, this.perPage).subscribe({
-      next: (data: any) => {
-        this.cryptos = data;
-        this.applySortAndFilter();
-        this.cdr.detectChanges();
-        if (this.bitcoinData) {
-          this.bitcoinData = this.cryptos.find(c => c.id === 'bitcoin');
-        }
-      },
-      error: (err: any) => {
-        console.error('Erro ao atualizar:', err);
       }
     });
   }
@@ -107,7 +93,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
 
     if (!this.mainChartCanvas || !this.bitcoinHistoryData || !this.bitcoinHistoryData.prices) {
-      console.log('Dados do grafico nao disponiveis');
       return;
     }
 
@@ -142,38 +127,30 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            labels: {
-              color: '#a0a0c0',
-              font: { size: 12 }
-            }
+            labels: { color: '#a0a0c0', font: { size: 12 } }
           },
           tooltip: {
             callbacks: {
-              label: (context) => {
-                let value = context.parsed.y;
-                return `Preco: ${this.formatPrice(value)}`;
-              }
+              label: (context) => `Preco: ${this.formatPrice(context.parsed.y)}`
             }
           }
         },
         scales: {
-          x: {
-            ticks: { color: '#606090' },
-            grid: { color: 'rgba(96, 96, 144, 0.2)' }
-          },
-          y: {
-            ticks: { color: '#606090' },
-            grid: { color: 'rgba(96, 96, 144, 0.2)' }
-          }
+          x: { ticks: { color: '#606090' }, grid: { color: 'rgba(96, 96, 144, 0.2)' } },
+          y: { ticks: { color: '#606090' }, grid: { color: 'rgba(96, 96, 144, 0.2)' } }
         }
       }
     });
   }
 
   applySortAndFilter(): void {
+    if (!this.cryptos || !Array.isArray(this.cryptos)) {
+      return;
+    }
+    
     let result = [...this.cryptos];
     
-    if (this.searchTerm) {
+    if (this.searchTerm && this.searchTerm.trim()) {
       result = result.filter(crypto =>
         crypto.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         crypto.symbol.toLowerCase().includes(this.searchTerm.toLowerCase())
@@ -196,7 +173,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             aValue = a.market_cap;
             bValue = b.market_cap;
             break;
-          case 'rank':
           default:
             aValue = a.market_cap_rank;
             bValue = b.market_cap_rank;
@@ -275,48 +251,32 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       type: 'line',
       data: {
         labels: labels,
-        datasets: [
-          {
-            label: `Preco (BRL) - ${this.selectedCrypto?.name || ''}`,
-            data: data,
-            borderColor: '#7c5cff',
-            backgroundColor: 'rgba(124, 92, 255, 0.1)',
-            borderWidth: 2,
-            pointRadius: 3,
-            pointBackgroundColor: '#7c5cff',
-            tension: 0.3,
-            fill: true
-          }
-        ]
+        datasets: [{
+          label: `Preco (BRL) - ${this.selectedCrypto?.name || ''}`,
+          data: data,
+          borderColor: '#7c5cff',
+          backgroundColor: 'rgba(124, 92, 255, 0.1)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#7c5cff',
+          tension: 0.3,
+          fill: true
+        }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            labels: {
-              color: '#a0a0c0',
-              font: { size: 12 }
-            }
-          },
+          legend: { labels: { color: '#a0a0c0', font: { size: 12 } } },
           tooltip: {
             callbacks: {
-              label: (context) => {
-                let value = context.parsed.y;
-                return `Preco: ${this.formatPrice(value)}`;
-              }
+              label: (context) => `Preco: ${this.formatPrice(context.parsed.y)}`
             }
           }
         },
         scales: {
-          x: {
-            ticks: { color: '#606090' },
-            grid: { color: 'rgba(96, 96, 144, 0.2)' }
-          },
-          y: {
-            ticks: { color: '#606090' },
-            grid: { color: 'rgba(96, 96, 144, 0.2)' }
-          }
+          x: { ticks: { color: '#606090' }, grid: { color: 'rgba(96, 96, 144, 0.2)' } },
+          y: { ticks: { color: '#606090' }, grid: { color: 'rgba(96, 96, 144, 0.2)' } }
         }
       }
     });

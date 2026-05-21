@@ -17,16 +17,13 @@
   <div class="sort-bar">
     <span class="sort-label">Ordenar por:</span>
     <div class="sort-buttons">
-      <button (click)="sortBy('price')" [class.active]="sortType === 'price'" class="sort-btn">Preco</button>
-      <button (click)="sortBy('change')" [class.active]="sortType === 'change'" class="sort-btn">Variacao</button>
+      <button (click)="sortBy('price')" [class.active]="sortType === 'price'" class="sort-btn">Preço</button>
+      <button (click)="sortBy('change')" [class.active]="sortType === 'change'" class="sort-btn">Variação</button>
       <button (click)="sortBy('marketCap')" [class.active]="sortType === 'marketCap'" class="sort-btn">Market Cap</button>
       <button (click)="sortBy('rank')" [class.active]="sortType === 'rank'" class="sort-btn">Rank</button>
     </div>
     <button (click)="toggleOrder()" class="order-btn">
       {{ sortAscending ? 'Crescente ↑' : 'Decrescente ↓' }}
-    </button>
-    <button (click)="refreshData()" class="refresh-btn">
-      Atualizar
     </button>
   </div>
 
@@ -54,7 +51,7 @@
 
   <div class="loading" *ngIf="loading">
     <div class="spinner"></div>
-    <p>Carregando dados do universo cripto...</p>
+    <p>Carregando dados...</p>
   </div>
 
   <div class="crypto-grid" *ngIf="!loading && filteredCryptos.length > 0">
@@ -95,15 +92,13 @@
             {{ formatPercentage(selectedCrypto.price_change_percentage_24h) }}
           </span>
         </div>
-
         <div class="chart-container" *ngIf="!chartLoading">
           <canvas #priceChart></canvas>
         </div>
         <div class="loading-chart" *ngIf="chartLoading">
           <div class="small-spinner"></div>
-          <p>Carregando grafico...</p>
+          <p>Carregando gráfico...</p>
         </div>
-
         <div class="stats">
           <div class="stat">
             <label>Market Cap</label>
